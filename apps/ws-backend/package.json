@@ -13,6 +13,7 @@
     "@types/ws": "^8.18.0",
     "@workspace/typescript-config": "workspace:*",
     "jsonwebtoken": "^9.0.2",
+    "@workspace/backend-common":"workspace:*",
     "ws": "^8.18.1"
   },
   "keywords": [],
