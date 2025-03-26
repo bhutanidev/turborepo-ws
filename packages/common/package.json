@@ -4,17 +4,22 @@
   "description": "",
   "main": "index.js",
   "devDependencies": {
-    "@workspace/typescript-config":"workspace:*"
+    "@workspace/typescript-config": "workspace:*"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsc",
+    "build": "tsc"
   },
-  "exports":{
-    "./types":"./src/types.ts"
+  "exports": {
+    "./zodschema": {
+      "types":"./src/index.ts",
+      "default":"./dist/index.js"
+    }
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^20",
     "zod": "^3.24.2"
   }
 }
