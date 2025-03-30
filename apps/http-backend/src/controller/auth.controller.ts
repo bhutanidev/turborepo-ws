@@ -1,7 +1,7 @@
 import ApiError from "../utils/ApiError";
 import apiResponse from "../utils/ApiResponse";
 import asyncHandler from "../utils/asyncHandler";
-import { CreateUserSchema , SigninUserSchema} from "@workspace/common/zodschema"
+import { CreateUserSchema , SigninUserSchema , CreateRoomSchema} from "@workspace/common/zodschema"
 import {prismaClient} from "@workspace/db/client"
 import jwt from "jsonwebtoken"
 import { comparePassword,hashPassword } from "../utils/Encryption";
@@ -19,38 +19,37 @@ export const signupController=asyncHandler(async(req,res,next)=>{
             email:email
         }
     })
+    
     if(found){
         next(new ApiError(400,"Email already exists"))
         return;
     }
     const hashedpw = await hashPassword(password)
-    prismaClient.user.create({
+    const newentry = await prismaClient.user.create({
         data:{
             email:psdata.data?.email,
             password:hashedpw as string,
             name:psdata.data?.name
         }
     })
-    res.status(200).json(new apiResponse(200,{email,name},"User created succsessfully"))
+    if(!newentry){
+        next(new ApiError(500,"Database error"))
+        return
+    }
+    res.status(200).json(new apiResponse(200,{email:newentry.email,name:newentry.name},"User created succsessfully"))
 })
 
 export const signinController=asyncHandler(async(req,res,next)=>{
     const {password, email }=req.body
-    const data = SigninUserSchema.safeParse(req.body)
-    if(!data.success){
-        next(new ApiError(400,data.error.message||"Fill the fields correctly"))
+    const psdata = SigninUserSchema.safeParse(req.body)
+    if(!psdata.success){
+        next(new ApiError(400,psdata.error.message||"Fill the fields correctly"))
         return;
-    }
-    if(typeof email !== 'string' || email.trim()==='' ||
-       typeof password !== 'string' || password.trim()===''
-    ){
-        next(new ApiError(400,"Fill all required fields and must be valid"))
-        return
     }
     //add cookie
     const found = await prismaClient.user.findFirst({
         where:{
-            email:email
+            email:psdata.data.email
         }
     })
     if(!found){
@@ -63,11 +62,53 @@ export const signinController=asyncHandler(async(req,res,next)=>{
         return
     }
     const token = jwt.sign({id:found.id,email:found.email,name:found.name},JWT_SECRET)
-    res.cookie("token",token,{httpOnly:true}).status(200).json(new apiResponse(200,{email,password},"created succsessfully"))
+    res.cookie("token",token,{httpOnly:true}).status(200).json(new apiResponse(200,{email},"User logged in"))
+})
+
+export const createRoomController=asyncHandler(async(req,res,next)=>{
+    const psdata = CreateRoomSchema.safeParse(req.body)
+    if(!psdata.success){
+        next(new ApiError(400,psdata.error.message||"Fill the fields correctly"))
+        return;
+    }
+    //add cookie
+    const userId = req.userId
+    if(typeof userId === undefined || !userId){
+        next(new ApiError(400,"Unauthorized"));
+        return
+    }
+    const found = await prismaClient.room.findFirst({
+        where:{
+            slug:psdata.data.slug
+        }
+    })
+    
+    if(found){
+        next(new ApiError(400,"Room name already exists"))
+        return;
+    }
+    try {
+            const newentry = await prismaClient.room.create({
+                data:{
+                    slug:psdata.data.slug,
+                    adminId:userId
+                }
+            })
+            if(!newentry){
+                next(new ApiError(500,"Database error"))
+                return
+            }
+            res.json(new apiResponse(200,{slug:newentry.slug,id:newentry.id,adminId:newentry.adminId},"Room created successfully"))
+            return
+    } catch (error) {
+        next(new ApiError(500,"db error"))
+        return
+    }
 })
 
 
 module.exports={
     signupController,
-    signinController
+    signinController,
+    createRoomController
 }

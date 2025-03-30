@@ -1,23 +1,25 @@
 import { NextFunction , Request,Response } from "express"
 import jwt from "jsonwebtoken"
 import ApiError from "../utils/ApiError"
+import { JWT_SECRET } from "@workspace/backend-common/config"
 
 
 export const attachUser = async(req:Request,res:Response,next: NextFunction)=>{
 
     try {
-        const header = req.headers['authorization']
-        const token = header?.split(" ")[1] as string
+        console.log(req.cookies)
+        const token = req.cookies?.token
+        console.log(token)
         if(!token){
-            next(new ApiError(403,"Invalid token"))
+            next(new ApiError(403,"No token found"))
             return
         }
-        const key :string = process.env.JWT_SECRET as string
+        const key :string = "igsigoig93209h"
     
-        const decoded = await jwt.verify(token,key)
+        const decoded = await jwt.verify(token,JWT_SECRET)
     
         if(decoded && typeof decoded === 'object'){
-            // req.userId = decoded.id
+            req.userId = decoded.id
             next()
             return
         }else{
@@ -27,7 +29,7 @@ export const attachUser = async(req:Request,res:Response,next: NextFunction)=>{
         }
     } catch (error) {
         console.error(error)
-        next(new ApiError(403,"Invalid token"))
+        next(new ApiError(403,"invalid signature"))
 
     }
 
