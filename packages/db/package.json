@@ -6,10 +6,10 @@
   "devDependencies": {
     "@workspace/typescript-config": "workspace:*"
   },
-  "exports":{
-    "./client":{
-      "types":"./src/index.ts",
-      "default":"./dist/index.js"
+  "exports": {
+    "./client": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
@@ -19,7 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "6.5.0",
+    "@prisma/client": "^6.5.0",
     "prisma": "^6.5.0"
   }
 }
