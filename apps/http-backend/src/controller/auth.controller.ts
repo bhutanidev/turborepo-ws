@@ -62,7 +62,7 @@ export const signinController=asyncHandler(async(req,res,next)=>{
         return
     }
     const token = jwt.sign({id:found.id,email:found.email,name:found.name},JWT_SECRET)
-    res.cookie("token",token,{httpOnly:true}).status(200).json(new apiResponse(200,{email},"User logged in"))
+    res.cookie("token",token).status(200).json(new apiResponse(200,{email},"User logged in"))
 })
 
 export const createRoomController=asyncHandler(async(req,res,next)=>{
