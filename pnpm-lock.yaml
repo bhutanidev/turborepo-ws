@@ -65,6 +65,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@prisma/client':
+        specifier: ^6.5.0
+        version: 6.5.0(prisma@6.5.0(typescript@5.7.3))(typescript@5.7.3)
+      '@workspace/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@workspace/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -114,6 +120,9 @@ importers:
       '@workspace/backend-common':
         specifier: workspace:*
         version: link:../../packages/backend-common
+      '@workspace/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@workspace/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
